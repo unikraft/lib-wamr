@@ -1,0 +1,112 @@
+#  wamr Makefile.uk
+#
+#  Authors: Felipe Huici <felipe.huici@neclab.eu>
+#
+#
+#  Copyright (c) 2019, NEC Europe Ltd., NEC Corporation. All rights reserved.
+#
+#  Redistribution and use in source and binary forms, with or without
+#  modification, are permitted provided that the following conditions
+#  are met:
+#
+#  1. Redistributions of source code must retain the above copyright
+#     notice, this list of conditions and the following disclaimer.
+#  2. Redistributions in binary form must reproduce the above copyright
+#     notice, this list of conditions and the following disclaimer in the
+#     documentation and/or other materials provided with the distribution.
+#  3. Neither the name of the copyright holder nor the names of its
+#     contributors may be used to endorse or promote products derived from
+#     this software without specific prior written permission.
+#
+#  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+#  AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+#  IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+#  ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+#  LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+#  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+#  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+#  INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+#  CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+#  ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+#  POSSIBILITY OF SUCH DAMAGE.
+#
+#  THIS HEADER MAY NOT BE EXTRACTED OR MODIFIED IN ANY WAY.
+#
+
+################################################################################
+# Library registration
+################################################################################
+$(eval $(call addlib_s,libwamr,$(CONFIG_LIBWAMR)))
+
+################################################################################
+# Sources
+################################################################################
+# Sept 9th commit
+LIBWAMR_VERSION=bc762fe9e2cf2d26a0cde42931c4b6ed79860047
+LIBWAMR_URL=https://github.com/intel/wasm-micro-runtime/archive/$(LIBWAMR_VERSION).zip
+
+LIBWAMR_DIR=wasm-micro-runtime-$(LIBWAMR_VERSION)
+LIBWAMR_PATCHDIR=$(LIBWAMR_BASE)/patches
+
+$(eval $(call fetchas,libwamr,$(LIBWAMR_URL),$(LIBWAMR_VERSION).zip))
+$(eval $(call patch,libwamr,$(LIBWAMR_PATCHDIR),wasm-micro-runtime-$(LIBWAMR_VERSION)))
+
+################################################################################
+# Helpers
+################################################################################
+LIBWAMR_SRC=$(LIBWAMR_ORIGIN)/$(LIBWAMR_DIR)
+
+################################################################################
+# Library includes
+################################################################################
+CINCLUDES-$(CONFIG_LIBWAMR) += -I$(LIBWAMR_BASE)/include                         \
+   			       -I$(LIBWAMR_SRC)/core/iwasm/runtime/vmcore-wasm   \
+   			       -I$(LIBWAMR_SRC)/core/iwasm/runtime/platform/include \
+   			       -I$(LIBWAMR_SRC)/core/iwasm/runtime/include       \
+			       -I$(LIBWAMR_SRC)/core/shared-lib/platform/include \
+			       -I$(LIBWAMR_SRC)/core/shared-lib/include          \
+
+################################################################################
+# Library flags
+################################################################################
+LIBWAMR_SUPPRESS_FLAGS += -Wno-implicit-function-declaration \
+		          -Wno-sign-compare                  \
+			  -Wno-pointer-to-int-cast           \
+			  -Wno-unused-parameter              \
+			  -Wno-int-conversion                \
+			  -Wno-unused-label                  \
+			  -Wno-unused-but-set-variable       \
+			  -Wno-cast-function-type            \
+			  -Wno-implicit-fallthrough
+
+LIBWAMR_CFLAGS-y += -DNVALGRIND $(LIBWAMR_SUPPRESS_FLAGS)
+LIBWAMR_CXXFLAGS-y += -DNVALGRIND $(LIBWAMR_SUPPRESS_FLAGS)
+
+################################################################################
+# Glue code
+################################################################################
+LIBWAMR_SRCS-$(CONFIG_LIBWAMR_MAIN_FUNCTION) += $(LIBWAMR_BASE)/glue.c
+
+################################################################################
+# Sources
+################################################################################
+LIBWAMR_MAIN_FLAGS-y += -Dmain=wamr_main
+LIBWAMR_SRCS-y += $(LIBWAMR_SRC)/core/iwasm/products/linux/main.c
+LIBWAMR_SRCS-y += $(LIBWAMR_SRC)/core/iwasm/runtime/vmcore-wasm/invokeNative_general.c
+LIBWAMR_SRCS-y += $(LIBWAMR_SRC)/core/iwasm/runtime/vmcore-wasm/wasm_application.c
+LIBWAMR_SRCS-y += $(LIBWAMR_SRC)/core/iwasm/runtime/vmcore-wasm/wasm_interp.c
+LIBWAMR_SRCS-y += $(LIBWAMR_SRC)/core/iwasm/runtime/vmcore-wasm/wasm_loader.c
+LIBWAMR_SRCS-y += $(LIBWAMR_SRC)/core/iwasm/runtime/vmcore-wasm/wasm_runtime.c
+LIBWAMR_SRCS-y += $(LIBWAMR_SRC)/core/shared-lib/mem-alloc/bh_memory.c
+LIBWAMR_SRCS-y += $(LIBWAMR_SRC)/core/iwasm/runtime/utils/wasm_log.c
+LIBWAMR_SRCS-y += $(LIBWAMR_SRC)/core/shared-lib/platform/linux/bh_thread.c
+LIBWAMR_SRCS-y += $(LIBWAMR_SRC)/core/iwasm/runtime/utils/wasm_hashmap.c
+LIBWAMR_SRCS-y += $(LIBWAMR_SRC)/core/iwasm/lib/native/libc/libc_wrapper.c
+LIBWAMR_SRCS-y += $(LIBWAMR_SRC)/core/iwasm/runtime/utils/wasm_dlfcn.c
+LIBWAMR_SRCS-y += $(LIBWAMR_SRC)/core/shared-lib/mem-alloc/mem_alloc.c
+LIBWAMR_SRCS-y += $(LIBWAMR_SRC)/core/shared-lib/platform/linux/bh_platform.c
+LIBWAMR_SRCS-y += $(LIBWAMR_SRC)/core/iwasm/runtime/platform/zephyr/wasm_native.c
+LIBWAMR_SRCS-y += $(LIBWAMR_SRC)/core/iwasm/lib/native/base/base_lib_export.c
+LIBWAMR_SRCS-y += $(LIBWAMR_SRC)/core/iwasm/products/linux/ext_lib_export.c
+LIBWAMR_SRCS-y += $(LIBWAMR_SRC)/core/shared-lib/mem-alloc/ems/ems_kfc.c
+LIBWAMR_SRCS-y += $(LIBWAMR_SRC)/core/shared-lib/mem-alloc/ems/ems_alloc.c
