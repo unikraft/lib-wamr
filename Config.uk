@@ -1,0 +1,14 @@
+menuconfig LIBWAMR
+	bool "wamr - Intel's WebAssembly Micro Runtime"
+	default y
+	select LIBNEWLIBC
+	select LIBLWIP
+	select LIBPTHREAD_EMBEDDED
+	select LIBUKTIME
+	select UKUNISTD
+	   
+if LIBWAMR
+config LIBWAMR_MAIN_FUNCTION
+	bool "Provide main function"
+	default y
+endif
