@@ -1,0 +1,11 @@
+--- /core/shared-lib/platform/linux/bh_thread.c.orig	2019-07-30 11:10:57.884821508 +0200
++++ /core/shared-lib/platform/linux/bh_thread.c	2019-07-30 11:11:54.492244787 +0200
+@@ -16,7 +16,7 @@
+ 
+ #include "bh_thread.h"
+ #include "bh_assert.h"
+-#include "bh_log.h"
++#include "wasm_log.h"
+ #include "bh_memory.h"
+ #include <stdio.h>
+ #include <stdlib.h>

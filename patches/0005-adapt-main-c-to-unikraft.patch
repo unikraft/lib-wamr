@@ -1,0 +1,116 @@
+--- a/core/iwasm/products/linux/main.c	2019-09-09 14:51:40.000000000 +0200
++++ b/core/iwasm/products/linux/main.c	2019-10-11 10:57:38.858381930 +0200
+@@ -28,6 +28,8 @@
+ #include "wasm_memory.h"
+ #include "bh_memory.h"
+ 
++#include <uk/plat/memory.h>
++
+ static int app_argc;
+ static char **app_argv;
+ 
+@@ -158,7 +160,7 @@
+     return NULL;
+ }
+ 
+-#define USE_GLOBAL_HEAP_BUF 0
++#define USE_GLOBAL_HEAP_BUF 1
+ 
+ #if USE_GLOBAL_HEAP_BUF != 0
+ static char global_heap_buf[10 * 1024 * 1024] = { 0 };
+@@ -177,15 +179,11 @@
+     int log_verbose_level = 1;
+ #endif
+     bool is_repl_mode = false;
+-
++    
+     /* Process options.  */
+     for (argc--, argv++; argc > 0 && argv[0][0] == '-'; argc--, argv++) {
+         if (!strcmp(argv[0], "-f") || !strcmp(argv[0], "--function")) {
+             argc--, argv++;
+-            if (argc < 2) {
+-                print_help();
+-                return 0;
+-            }
+             func_name = argv[0];
+         }
+ #if WASM_ENABLE_LOG != 0
+@@ -197,13 +195,8 @@
+ #endif
+         else if (!strcmp(argv[0], "--repl"))
+             is_repl_mode = true;
+-        else
+-            return print_help();
+     }
+ 
+-    if (argc == 0)
+-        return print_help();
+-
+     wasm_file = argv[0];
+     app_argc = argc;
+     app_argv = argv;
+@@ -227,35 +220,39 @@
+ 
+     wasm_log_set_verbose_level(log_verbose_level);
+ 
+-    /* load WASM byte buffer from WASM bin file */
+-    if (!(wasm_file_buf = (uint8*) bh_read_file_to_buffer(wasm_file,
+-                                                          &wasm_file_size)))
+-        goto fail2;
+-
+-    /* load WASM module */
+-    if (!(wasm_module = wasm_runtime_load(wasm_file_buf, wasm_file_size,
+-                                          error_buf, sizeof(error_buf)))) {
+-        wasm_printf("%s\n", error_buf);
+-        goto fail3;
+-    }
+-
+-    /* instantiate the module */
+-    if (!(wasm_module_inst = wasm_runtime_instantiate(wasm_module,
+-                                                      64 * 1024, /* stack size */
+-                                                      64 * 1024, /* heap size */
+-                                                      error_buf,
+-                                                      sizeof(error_buf)))) {
+-        wasm_printf("%s\n", error_buf);
+-        goto fail4;
++    /* load from initrd */
++    struct ukplat_memregion_desc img;
++    if (ukplat_memregion_find_initrd0(&img) >= 0) {
++      wasm_file_buf = (uint8*)img.base;
++      wasm_file_size = img.len;
++      
++      /* load WASM module */
++      if (!(wasm_module = wasm_runtime_load(wasm_file_buf, wasm_file_size,
++                                            error_buf, sizeof(error_buf)))) {
++          wasm_printf("%s\n", error_buf);
++          goto fail3;
++      }
++
++      /* instantiate the module */
++      if (!(wasm_module_inst = wasm_runtime_instantiate(wasm_module,
++                                                        64 * 1024, /* stack size */
++                                                        64 * 1024, /* heap size */
++                                                        error_buf,
++                                                        sizeof(error_buf)))) {
++          wasm_printf("%s\n", error_buf);
++          goto fail4;
++      }
++      app_instance_main(wasm_module_inst);
++    }
++    else if (is_repl_mode) {
++       printf("Entering REPL mode...\n");
++       app_instance_repl(wasm_module_inst);
+     }
+-
+-    if (is_repl_mode)
+-        app_instance_repl(wasm_module_inst);
+     else if (func_name)
+         app_instance_func(wasm_module_inst, func_name);
+     else
+-        app_instance_main(wasm_module_inst);
+-
++      printf("warning: did not select --repl nor -initrd mode!\n");
++    
+     /* destroy the module instance */
+     wasm_runtime_deinstantiate(wasm_module_inst);
+ 

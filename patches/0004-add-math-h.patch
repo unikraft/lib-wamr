@@ -1,0 +1,11 @@
+--- a/core/iwasm/runtime/vmcore-wasm/wasm_interp.c	2019-10-04 19:29:40.818609262 +0200
++++ b/core/iwasm/runtime/vmcore-wasm/wasm_interp.c	2019-10-04 19:29:52.050488455 +0200
+@@ -22,6 +22,8 @@
+ #include "wasm_log.h"
+ #include "wasm_memory.h"
+ 
++#include <math.h>
++
+ typedef int32 CellType_I32;
+ typedef int64 CellType_I64;
+ typedef float32 CellType_F32;

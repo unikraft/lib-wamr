@@ -1,0 +1,15 @@
+--- /core/iwasm/runtime/utils/wasm_log.c.orig	2019-07-30 10:01:46.715217329 +0200
++++ /core/iwasm/runtime/utils/wasm_log.c	2019-07-30 10:07:26.891746359 +0200
+@@ -57,8 +57,11 @@
+   /* Try to own the log stream and start the log output.  */
+   ws_mutex_lock (&log_stream_lock);
+   self = ws_self_thread ();
++#ifdef CONFIG_LIBPTHREAD_EMBEDDED
++  wasm_printf ("[%X]: ", (int)self.p);  
++#else
+   wasm_printf ("[%X]: ", (int)self);
+-
++#endif
+   return true;
+ }
+ 

@@ -1,0 +1,16 @@
+--- /core/shared-lib/platform/linux/bh_thread.c.orig	2019-07-30 10:08:21.243191688 +0200
++++ /core/shared-lib/platform/linux/bh_thread.c	2019-07-30 10:08:55.110846278 +0200
+@@ -93,8 +93,12 @@
+     bh_assert(tid);
+     bh_assert(start);
+ 
++#ifdef CONFIG_LIBPTHREAD_EMBEDDED
++    tid->p = INVALID_THREAD_ID;
++#else
+     *tid = INVALID_THREAD_ID;
+-
++#endif
++    
+     pthread_attr_init(&tattr);
+     pthread_attr_setdetachstate(&tattr, PTHREAD_CREATE_JOINABLE);
+     if (pthread_attr_setstacksize(&tattr, stack_size) != 0) {
