@@ -76,7 +76,7 @@
 +    /* load from initrd */
 +    struct ukplat_memregion_desc img;
 +    if (ukplat_memregion_find_initrd0(&img) >= 0) {
-+      wasm_file_buf = (uint8*)img.base;
++      wasm_file_buf = (uint8*)img.pbase;
 +      wasm_file_size = img.len;
 +      
 +      /* load WASM module */
