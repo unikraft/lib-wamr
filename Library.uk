@@ -1,0 +1,6 @@
+name        := "wamr"
+description := "A standalone WebAssembly runtime with a small footprint."
+gitrepo     := "https://github.com/bytecodealliance/wasm-micro-runtime.git"
+homepage    := "https://github.com/bytecodealliance/wasm-micro-runtime/"
+license     := "Apache-2.0"
+version     := bc762fe sha256:62ac55c0109a02da1e790016f5ad3efb237fd5df96fee6bd806adbdf6b5a3fe0 https://github.com/bytecodealliance/wasm-micro-runtime/archive/bc762fe.tar.gz
