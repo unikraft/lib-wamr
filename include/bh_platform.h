@@ -26,6 +26,7 @@
 #include <time.h>
 #include <string.h>
 #include <stdio.h>
+#include <uk/essentials.h>
 
 #ifndef __cplusplus
 int snprintf(char *buffer, size_t count, const char *format, ...);
@@ -110,6 +111,8 @@ typedef int bh_socket_t;
 #ifndef NULL
 #  define NULL ((void*) 0)
 #endif
+
+#define offsetof __offsetof
 
 #define bh_assert assert
 

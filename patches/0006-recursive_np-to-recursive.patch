@@ -1,0 +1,11 @@
+--- /core/shared-lib/platform/linux/bh_thread.c orig	2023-07-15 14:14:26.388776102 +0200
++++ /core/shared-lib/platform/linux/bh_thread.c	2023-07-15 14:13:17.443138319 +0200
+@@ -176,7 +176,7 @@
+     if (ret)
+         return BHT_ERROR;
+ 
+-    pthread_mutexattr_settype(&mattr, PTHREAD_MUTEX_RECURSIVE_NP);
++    pthread_mutexattr_settype(&mattr, PTHREAD_MUTEX_RECURSIVE);
+     ret = pthread_mutex_init(mutex, &mattr);
+     pthread_mutexattr_destroy(&mattr);
+ 
