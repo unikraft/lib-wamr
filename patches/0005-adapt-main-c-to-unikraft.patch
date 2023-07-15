@@ -74,10 +74,10 @@
 -        wasm_printf("%s\n", error_buf);
 -        goto fail4;
 +    /* load from initrd */
-+    struct ukplat_memregion_desc img;
++    struct ukplat_memregion_desc *img;
 +    if (ukplat_memregion_find_initrd0(&img) >= 0) {
-+      wasm_file_buf = (uint8*)img.base;
-+      wasm_file_size = img.len;
++      wasm_file_buf = (uint8*)img->vbase;
++      wasm_file_size = img->len;
 +      
 +      /* load WASM module */
 +      if (!(wasm_module = wasm_runtime_load(wasm_file_buf, wasm_file_size,

@@ -1,9 +1,8 @@
 menuconfig LIBWAMR
 	bool "wamr - Intel's WebAssembly Micro Runtime"
 	default y
-	select LIBNEWLIBC
+	select LIBMUSL
 	select LIBLWIP
-	select LIBPTHREAD_EMBEDDED
 	select LIBUKTIME
 	select UKUNISTD
 	   
