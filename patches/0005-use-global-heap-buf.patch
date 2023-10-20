@@ -1,0 +1,11 @@
+--- a/core/iwasm/products/linux/main.c
++++ b/core/iwasm/products/linux/main.c
+@@ -158,7 +158,7 @@ app_instance_repl(wasm_module_inst_t module_inst)
+     return NULL;
+ }
+ 
+-#define USE_GLOBAL_HEAP_BUF 0
++#define USE_GLOBAL_HEAP_BUF 1
+ 
+ #if USE_GLOBAL_HEAP_BUF != 0
+ static char global_heap_buf[10 * 1024 * 1024] = { 0 };
